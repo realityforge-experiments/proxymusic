@@ -226,7 +226,6 @@
                 </executions>
             </plugin>
 
-
             <!-- Entries in Jar manifest -->
             <!-- NOTA: For this, we need exportAntProperties to work correctly
             and this is not yet the case for Maven 3.0.4 -->
