@@ -37,7 +37,7 @@ public class ScorePartTest
     /** Usual logger utility */
     private static final Logger logger = LoggerFactory.getLogger(ScorePartTest.class);
 
-    /**
+    /*
      * <part-list>
      * <score-part id="P1">
      * <part-name print-object="no">Voice</part-name>
