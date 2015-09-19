@@ -12,7 +12,6 @@
 package com.audiveris.proxymusic.util;
 
 import com.audiveris.proxymusic.ScorePartwise.Part.Measure;
-
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.stream.XMLStreamWriter;
 

@@ -9,27 +9,41 @@
 //
 package com.audiveris.proxymusic.util;
 
-import com.audiveris.proxymusic.*;
+import com.audiveris.proxymusic.Attributes;
+import com.audiveris.proxymusic.Clef;
+import com.audiveris.proxymusic.ClefSign;
+import com.audiveris.proxymusic.Empty;
+import com.audiveris.proxymusic.Key;
+import com.audiveris.proxymusic.Note;
+import com.audiveris.proxymusic.NoteType;
+import com.audiveris.proxymusic.ObjectFactory;
+import com.audiveris.proxymusic.Opus;
+import com.audiveris.proxymusic.PartList;
+import com.audiveris.proxymusic.PartName;
+import com.audiveris.proxymusic.Pitch;
+import com.audiveris.proxymusic.ScorePart;
+import com.audiveris.proxymusic.ScorePartwise;
 import com.audiveris.proxymusic.ScorePartwise.Part;
 import com.audiveris.proxymusic.ScorePartwise.Part.Measure;
-import static com.audiveris.proxymusic.util.Marshalling.getContext;
-
-import junit.framework.TestCase;
-
-import org.junit.Test;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.*;
-import java.lang.String; // Do not remove this line
+import com.audiveris.proxymusic.Step;
+import com.audiveris.proxymusic.Time;
+import com.audiveris.proxymusic.Work;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
+import junit.framework.TestCase;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import static com.audiveris.proxymusic.util.Marshalling.getContext;
 
 /**
  * Class {@code HelloWorldTest} mimics the usual "HelloWorld" as

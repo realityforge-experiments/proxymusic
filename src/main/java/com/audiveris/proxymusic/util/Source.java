@@ -16,13 +16,11 @@ import com.audiveris.proxymusic.Miscellaneous;
 import com.audiveris.proxymusic.MiscellaneousField;
 import com.audiveris.proxymusic.ObjectFactory;
 import com.audiveris.proxymusic.ScorePartwise;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class {@code Source} precisely describes the source of a ScorePartwise.

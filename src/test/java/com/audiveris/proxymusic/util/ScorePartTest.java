@@ -9,19 +9,26 @@
 //
 package com.audiveris.proxymusic.util;
 
-import com.audiveris.proxymusic.*;
+import com.audiveris.proxymusic.Identification;
+import com.audiveris.proxymusic.MidiInstrument;
+import com.audiveris.proxymusic.ObjectFactory;
+import com.audiveris.proxymusic.PartList;
+import com.audiveris.proxymusic.PartName;
+import com.audiveris.proxymusic.ScoreInstrument;
+import com.audiveris.proxymusic.ScorePart;
+import com.audiveris.proxymusic.ScorePartwise;
 import com.audiveris.proxymusic.ScorePartwise.Part;
-
+import com.audiveris.proxymusic.YesNo;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
 import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.junit.Test;
-
-import java.io.*;
-import java.lang.String; // Do not remove this line
-import java.util.List;
 
 /**
  * This example test marshalling and unmarshalling with information

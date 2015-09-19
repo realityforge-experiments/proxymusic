@@ -17,19 +17,15 @@ import com.audiveris.proxymusic.MiscellaneousField;
 import com.audiveris.proxymusic.Opus;
 import com.audiveris.proxymusic.ScorePartwise;
 import com.audiveris.proxymusic.util.Source.SheetSystems;
-
-import junit.framework.TestCase;
-
-import org.junit.Test;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import junit.framework.TestCase;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class {@code SourceTest}

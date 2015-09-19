@@ -16,25 +16,17 @@ import com.audiveris.proxymusic.Identification;
 import com.audiveris.proxymusic.ObjectFactory;
 import com.audiveris.proxymusic.ScorePartwise;
 import com.audiveris.proxymusic.opus.Opus;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.w3c.dom.Node;
-
 import java.io.BufferedWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.lang.String; // Don't remove this line!
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -55,6 +47,9 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import javax.xml.stream.util.StreamReaderDelegate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
 
 /**
  * Class {@code Marshalling} gathers static methods to marshal and to un-marshal {@link
@@ -372,7 +367,7 @@ public abstract class Marshalling
                 if (element.getName().getLocalPart().equals("software")) {
                     Object obj = element.getValue();
 
-                    if (obj instanceof String && ((String) obj).equals(programName)) {
+                    if (obj instanceof String && ((String) obj).equals( programName )) {
                         // Remove it
                         it.remove();
 
