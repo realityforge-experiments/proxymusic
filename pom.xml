@@ -155,7 +155,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <!-- configure Maven to use JDK 7 for compilation -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -167,7 +167,7 @@
                     <testTarget>1.7</testTarget>
                 </configuration>
             </plugin>
-            
+
             <!-- Set system property to allow JAXB access to external schema -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -189,7 +189,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <!-- Generating Java sources from schemas -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -209,7 +209,7 @@
                             <bindingFiles>void.xjb</bindingFiles>
                         </configuration>
                     </execution>
-                    
+
                     <!-- for MusicXML -->
                     <execution>
                         <id>xjc-musicxml</id>

@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * Class <code>Dumper</code> is a debugging utility that reports, 
+ * Class <code>Dumper</code> is a debugging utility that reports,
  * in a brute force manner, any internal data of a class instance.
  *
  * <p> When used on a class instance, all class internal fields which are
