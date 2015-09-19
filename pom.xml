@@ -226,37 +226,6 @@
                 </executions>
             </plugin>
 
-            <!-- Ant tasks for Hg info -->
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <exportAntProperties>true</exportAntProperties>
-                            <target>
-                                <property name="program.name"
-                                          value="${project.name}">
-                                </property>
-                                <property name="program.version"
-                                          value="${project.version}">
-                                </property>
-                                <ant antfile="ant-tasks.xml"
-                                     dir="${basedir}"
-                                     target="generate-program-id"
-                                     inheritRefs="true" />
-                            </target>
-                            <sourceRoot>
-                                ${project.build.directory}/generated-sources/java
-                            </sourceRoot>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
 
             <!-- Entries in Jar manifest -->
             <!-- NOTA: For this, we need exportAntProperties to work correctly

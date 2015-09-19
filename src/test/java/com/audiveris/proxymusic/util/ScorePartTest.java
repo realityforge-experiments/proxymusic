@@ -61,7 +61,6 @@ public class ScorePartTest
      * </score-part>
      * </part-list>
      */
-    private static final String versionData = ProgramId.VERSION;
 
     private static final int dataNb = 2;
 
@@ -179,9 +178,6 @@ public class ScorePartTest
     protected void setUp ()
             throws Exception
     {
-        logger.info("ScorePartTest. name:{} version:{} revision:{}",
-                ProgramId.NAME, ProgramId.VERSION, ProgramId.REVISION);
-
         // Make sure the temp directory exists
         TEMP_DIR.mkdirs();
     }
@@ -255,7 +251,7 @@ public class ScorePartTest
     private void checkScorePartwise (ScorePartwise scr)
     {
         logger.info(new Dumper.Column(scr).toString());
-        assertEquals(versionData, scr.getVersion());
+        assertEquals("3.0", scr.getVersion());
 
         Identification identification = scr.getIdentification();
         assertNotNull(identification);

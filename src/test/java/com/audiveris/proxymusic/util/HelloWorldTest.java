@@ -49,8 +49,6 @@ public class HelloWorldTest
 
     private static final Logger logger = LoggerFactory.getLogger(HelloWorldTest.class);
 
-    private static final String versionData = ProgramId.VERSION;
-
     private static final AttrData attrData = new AttrData(
             new BigDecimal(1),
             new BigInteger("0"),
@@ -153,12 +151,6 @@ public class HelloWorldTest
     protected void setUp ()
             throws Exception
     {
-        logger.info(
-                "HelloWorldtest. name:{} version:{} revision:{}",
-                ProgramId.NAME,
-                ProgramId.VERSION,
-                ProgramId.REVISION);
-
         // Make sure the temp directory exists
         TEMP_DIR.mkdirs();
     }
@@ -320,7 +312,7 @@ public class HelloWorldTest
             assertNotNull(actuate);
         }
 
-        assertEquals(versionData, scr.getVersion());
+        assertEquals( "3.0", scr.getVersion());
 
         checkPartList(scr.getPartList());
 

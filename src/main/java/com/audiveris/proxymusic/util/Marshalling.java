@@ -101,12 +101,12 @@ public abstract class Marshalling
 
     /** The DOCTYPE statement for PARTWISE. */
     private static final String PARTWISE_DOCTYPE_LINE = "<!DOCTYPE score-partwise PUBLIC \"-//Recordare//DTD MusicXML "
-                                                        + ProgramId.VERSION
+                                                        + "3.0"
                                                         + " Partwise//EN\" \"http://www.musicxml.org/dtds/partwise.dtd\">";
 
     /** The DOCTYPE statement for OPUS. */
     private static final String OPUS_DOCTYPE_LINE = "<!DOCTYPE opus PUBLIC \"-//Recordare//DTD MusicXML "
-                                                    + ProgramId.VERSION
+                                                    + "3.0"
                                                     + " Opus//EN\" \"http://www.musicxml.org/dtds/opus.dtd\">";
 
     //~ Constructors -------------------------------------------------------------------------------
@@ -342,7 +342,7 @@ public abstract class Marshalling
         ObjectFactory factory = new ObjectFactory();
 
         // Inject version
-        scorePartwise.setVersion(ProgramId.VERSION);
+        scorePartwise.setVersion("3.0");
 
         // Inject signature if so desired
         if (injectSignature) {
@@ -364,7 +364,7 @@ public abstract class Marshalling
 
             // [Encoding]/Software (only if ProxyMusic is not already listed there)
             List<JAXBElement<?>> list = encoding.getEncodingDateOrEncoderOrSoftware();
-            final String programName = ProgramId.NAME + " ";
+            final String programName = "ProxyMusic";
 
             for (Iterator<JAXBElement<?>> it = list.iterator(); it.hasNext();) {
                 JAXBElement<?> element = it.next();
@@ -372,7 +372,7 @@ public abstract class Marshalling
                 if (element.getName().getLocalPart().equals("software")) {
                     Object obj = element.getValue();
 
-                    if (obj instanceof String && ((String) obj).startsWith(programName)) {
+                    if (obj instanceof String && ((String) obj).equals(programName)) {
                         // Remove it
                         it.remove();
 
@@ -382,8 +382,7 @@ public abstract class Marshalling
             }
 
             list.add(
-                    factory.createEncodingSoftware(
-                            ProgramId.NAME + " " + ProgramId.VERSION + "." + ProgramId.REVISION));
+                    factory.createEncodingSoftware( "ProxyMusic" ) );
 
             // [Encoding]/EncodingDate (overwrite any existing date)
             for (Iterator<JAXBElement<?>> it = list.iterator(); it.hasNext();) {
