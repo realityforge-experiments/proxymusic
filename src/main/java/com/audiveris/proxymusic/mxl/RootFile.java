@@ -51,7 +51,7 @@ public class RootFile
    *
    * @param fullPath path to the file, relative to root folder
    */
-  public RootFile( String fullPath )
+  public RootFile( @Nullable final String fullPath )
   {
     this( fullPath, null );
   }
