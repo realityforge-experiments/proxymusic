@@ -12,7 +12,7 @@ module Buildr #:nodoc:
       end
 
       def main_source_directories
-        @main_source_directories ||= [buildr_project.compile.sources,].flatten.compact
+        @main_source_directories ||= [buildr_project.compile.sources].flatten.compact
       end
 
       def main_resource_directories
@@ -47,14 +47,13 @@ module Buildr #:nodoc:
         xml.content(:url => 'file://$MODULE_DIR$') do
           # Source folders
           [
-            {:dirs => self.main_source_directories},
+            {:dirs => (self.main_source_directories.dup - self.main_generated_source_directories)},
             {:dirs => self.main_generated_source_directories, :generated => true},
-            {:type => 'resource', :dirs => self.main_resource_directories},
+            {:type => 'resource', :dirs => (self.main_resource_directories.dup - self.main_generated_resource_directories)},
             {:type => 'resource', :dirs => self.main_generated_resource_directories, :generated => true},
-
-            {:test => true, :dirs => self.test_source_directories},
+            {:test => true, :dirs => (self.test_source_directories - self.test_generated_source_directories)},
             {:test => true, :dirs => self.test_generated_source_directories, :generated => true},
-            {:test => true, :type => 'resource', :dirs => self.test_resource_directories},
+            {:test => true, :type => 'resource', :dirs => (self.test_resource_directories - self.test_generated_resource_directories)},
             {:test => true, :type => 'resource', :dirs => self.test_generated_resource_directories, :generated => true},
           ].each do |content|
             content[:dirs].map { |dir| dir.to_s }.compact.sort.uniq.each do |dir|
@@ -62,7 +61,7 @@ module Buildr #:nodoc:
               options[:url] = file_path(dir)
               options[:isTestSource] = (content[:test] ? 'true' : 'false') if content[:type] != 'resource'
               options[:type] = 'java-resource' if content[:type] == 'resource' && !content[:test]
-              options[:type] = 'java-test-resource' if content[:type] == 'resource' && !content[:test]
+              options[:type] = 'java-test-resource' if content[:type] == 'resource' && content[:test]
               options[:generated] = 'true' if content[:generated]
               xml.sourceFolder options
             end
