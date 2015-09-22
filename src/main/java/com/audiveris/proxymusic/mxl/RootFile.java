@@ -25,15 +25,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "rootfile")
 public class RootFile
 {
-    //~ Static fields/initializers -----------------------------------------------------------------
-
     /** Media type for an uncompressed MusicXML file (default). */
     public static final String MUSICXML_MEDIA_TYPE = "application/vnd.recordare.musicxml+xml";
 
     /** Media type for a compressed MusicXML file. */
     public static final String COMPRESSED_MUSICXML_MEDIA_TYPE = "application/vnd.recordare.musicxml";
 
-    //~ Instance fields ----------------------------------------------------------------------------
     /** Full path. Path relative to the root folder of the zip file */
     @XmlAttribute(name = "full-path")
     public final String fullPath;
@@ -42,7 +39,6 @@ public class RootFile
     @XmlAttribute(name = "media-type")
     public final String mediaType;
 
-    //~ Constructors -------------------------------------------------------------------------------
     /**
      * Creates a new {@code RootFile} object.
      *
@@ -76,7 +72,6 @@ public class RootFile
         this.mediaType = null;
     }
 
-    //~ Methods ------------------------------------------------------------------------------------
     @Override
     public String toString ()
     {
