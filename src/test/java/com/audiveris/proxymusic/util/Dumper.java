@@ -80,11 +80,6 @@ public abstract class Dumper
   protected final boolean useHtml;
 
   /**
-   * Maximum number of collection items printed
-   */
-  private final int MAX_COLLECTION_INDEX = 9;
-
-  /**
    * Class (beware, this variable is updated as we walk up the inheritance
    * tree)
    */
@@ -118,12 +113,7 @@ public abstract class Dumper
    */
   public static boolean isClassRelevant( Class cl )
   {
-    //        return (cl != null) && !cl.getName()
-    //                                  .startsWith("java.") &&
-    //               !cl.getName()
-    //                  .startsWith("javax.");
-    return ( cl != null ) && cl.getName()
-      .startsWith( "omr." );
+    return ( cl != null ) && cl.getName().startsWith( "omr." );
   }
 
   //-----------------//
@@ -146,121 +136,7 @@ public abstract class Dumper
     }
 
     // We don't print non-user visible entities
-    if ( field.getName()
-           .indexOf( '$' ) != -1 )
-    {
-      return false;
-    }
-
-    return true;
-  }
-
-  //------//
-  // dump //
-  //------//
-
-  /**
-   * Helper function that prints the internal data of an object onto the
-   * standard output.
-   *
-   * @param obj the instance to dump
-   */
-  public static void dump( Object obj )
-  {
-    dump( obj, null, 0 );
-  }
-
-  //------//
-  // dump //
-  //------//
-
-  /**
-   * Helper function that prints the internal data of an object onto the
-   * standard output, with a specified left indentation level.
-   *
-   * @param obj   the instance to dump
-   * @param level the indentation level (0 means no indentation)
-   */
-  public static void dump( Object obj,
-                           int level )
-  {
-    dump( obj, null, level );
-  }
-
-  //------//
-  // dump //
-  //------//
-
-  /**
-   * Helper function that prints the internal data of an object onto the
-   * standard output, with the ability to print a related title
-   *
-   * @param obj   the object to dump
-   * @param title the title to print beforehand
-   */
-  public static void dump( Object obj,
-                           String title )
-  {
-    dump( obj, title, 0 );
-  }
-
-  //------//
-  // dump //
-  //------//
-
-  /**
-   * Helper function that prints the internal data of an object onto the
-   * standard output, with room for a title and left indentation.
-   *
-   * @param obj   the object to dump
-   * @param title the title to print beforehand
-   * @param level the indentation level (0 for no indent)
-   */
-  public static void dump( Object obj,
-                           String title,
-                           int level )
-  {
-    new Column( obj, title, level ).print();
-  }
-
-  //--------//
-  // dumpOf //
-  //--------//
-
-  /**
-   * Helper function that returns a line which contains the whole set of
-   * internal data
-   *
-   * @param obj the object whose data is to be printed
-   * @return the string of data values
-   */
-  public static String dumpOf( Object obj )
-  {
-    return new Row( obj ).toString();
-  }
-
-  //------------//
-  // htmlDumpOf //
-  //------------//
-
-  /**
-   * Helper function that prints a special kind of information string, using
-   * HTML tags so that an html editor can easily render this.
-   *
-   * @param obj the object to dump
-   * @return the HTML string
-   */
-  public static String htmlDumpOf( Object obj )
-  {
-    return new Html( obj ).toString();
-  }
-
-  /**
-   * Print the dump string onto the standard output
-   */
-  public void print()
-  {
-    System.out.println( toString() );
+    return field.getName().indexOf( '$' ) == -1;
   }
 
   /**
@@ -306,9 +182,10 @@ public abstract class Dumper
       }
 
       // Safeguard action when the object is a big collection
-      if ( i > MAX_COLLECTION_INDEX )
+      final int maxCOllectionIndex = 9;
+      if ( i > maxCOllectionIndex )
       {
-        sb.append( " ... " + col.size() + " items" );
+        sb.append( " ... " ).append( col.size() ).append( " items" );
 
         break;
       }
@@ -481,116 +358,6 @@ public abstract class Dumper
       sb.append( "\n" );
       sb.append( prefix )
         .append( MEMBER_GAP );
-      sb.append( name )
-        .append( "=" );
-      super.printField( name, value );
-    }
-  }
-
-  /**
-   * Class <code>Html</code> implements a Dumper using HTML tags to present
-   * fields in a table.
-   */
-  public static class Html
-    extends Dumper
-  {
-    protected Html( Object obj )
-    {
-      super( obj, true );
-    }
-
-    @Override
-    public String toString()
-    {
-      // Style
-      sb.append( "<style> td {" )
-        .append( " font-family: Lucida Console, Verdana, sans-serif;" )
-        .append( " font-size: 9px;" )
-        .append( " font-style: normal;" )
-        .append( "} </style>" );
-
-      // Table begin
-      sb.append( "<table border=0 cellpadding=3>" );
-
-      // The object
-      super.processObject();
-
-      // Table end
-      sb.append( "</table>" );
-
-      // Return the final content of string buffer
-      return sb.toString();
-    }
-
-    @Override
-    protected void printClassProlog()
-    {
-      // Class name
-      sb.append( "<tr><td colspan=2><font color='BLUE'>" )
-        .append( cl.getName() )
-        .append( "</font></td></tr>" );
-    }
-
-    @Override
-    protected void printField( String name,
-                               Object value )
-    {
-      // One table row per field
-      sb.append( "<tr>" );
-
-      // First the field name
-      sb.append( "<td align='right'><font color='RED'>" )
-        .append( name )
-        .append( "</font></td>" );
-
-      // Then the field value
-      sb.append( "<td>" );
-      super.printField( name, value );
-
-      sb.append( "</td>" )
-        .append( "</tr>" );
-    }
-  }
-
-  /**
-   * Class <code>Row</code> implements a Dumper where all fields are presented
-   * on the same line.
-   */
-  public static class Row
-    extends Dumper
-  {
-    protected Row( Object obj )
-    {
-      super( obj, false );
-    }
-
-    @Override
-    protected void printClassEpilog()
-    {
-      sb.append( "}" );
-    }
-
-    @Override
-    protected void printClassProlog()
-    {
-      // Class name
-      sb.append( "{" );
-
-      // Special annotation for superclass
-      if ( obj.getClass() != cl )
-      {
-        sb.append( "from " );
-      }
-
-      sb.append( cl.getName() )
-        .append( ":" );
-    }
-
-    @Override
-    protected void printField( String name,
-                               Object value )
-    {
-      sb.append( " " );
       sb.append( name )
         .append( "=" );
       super.printField( name, value );
