@@ -41,7 +41,6 @@ import java.util.zip.ZipEntry;
 public class MxlOpusTest
         extends TestCase
 {
-    //~ Static fields/initializers -----------------------------------------------------------------
 
     private static final Logger logger = LoggerFactory.getLogger(MxlOpusTest.class);
 
@@ -53,7 +52,6 @@ public class MxlOpusTest
     /** Global MXL input stream. */
     private Mxl.Input mi;
 
-    //~ Methods ------------------------------------------------------------------------------------
     //------//
     // test //
     //------//
@@ -137,7 +135,7 @@ public class MxlOpusTest
 
         // Un-marshal
         RootFile first = mi.getRootFiles().get(0);
-        ZipEntry zipEntry = mi.getEntry(first.fullPath);
+        ZipEntry zipEntry = mi.getEntry(first._fullPath );
         InputStream is = mi.getInputStream(zipEntry);
 
         Object object = Marshalling.unmarshal(is);

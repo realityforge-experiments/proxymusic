@@ -65,7 +65,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Source
 {
-    //~ Static fields/initializers -----------------------------------------------------------------
 
     private static final Logger logger = LoggerFactory.getLogger(Source.class);
 
@@ -86,7 +85,6 @@ public class Source
     /** Systems processed in each image sheet. */
     private final List<SheetSystems> sheets = new ArrayList<SheetSystems>();
 
-    //~ Methods ------------------------------------------------------------------------------------
     //--------//
     // decode //
     //--------//
@@ -312,7 +310,6 @@ public class Source
         return intList;
     }
 
-    //~ Inner Classes ------------------------------------------------------------------------------
     //--------------//
     // SheetSystems //
     //--------------//
@@ -321,7 +318,6 @@ public class Source
      */
     public static class SheetSystems
     {
-        //~ Instance fields ------------------------------------------------------------------------
 
         /** Sheet number within source file, starting from 1. */
         final int sheetNumber;

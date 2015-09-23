@@ -71,7 +71,6 @@ import org.w3c.dom.Node;
  */
 public abstract class Marshalling
 {
-    //~ Static fields/initializers -----------------------------------------------------------------
 
     private static final Logger logger = LoggerFactory.getLogger(
             Marshalling.class);
@@ -112,7 +111,6 @@ public abstract class Marshalling
     {
     }
 
-    //~ Methods ------------------------------------------------------------------------------------
     //----------------//
     // getJaxbContext //
     //----------------//
@@ -403,7 +401,6 @@ public abstract class Marshalling
         }
     }
 
-    //~ Inner Classes ------------------------------------------------------------------------------
     /** Global exception for formatting. */
     public static class FormattingException
             extends Exception
@@ -449,7 +446,6 @@ public abstract class Marshalling
     private static class MyNamespaceContext
             implements NamespaceContext
     {
-        //~ Instance fields ------------------------------------------------------------------------
 
         private String defaultNS = "";
 
@@ -543,7 +539,6 @@ public abstract class Marshalling
     private static class MyStreamWriter
             extends StreamWriterDelegate
     {
-        //~ Instance fields ------------------------------------------------------------------------
 
         /** Special name context. */
         private final MyNamespaceContext nc = new MyNamespaceContext();
@@ -902,24 +897,20 @@ public abstract class Marshalling
             }
         }
 
-        //~ Inner Classes --------------------------------------------------------------------------
-        /**
+                /**
          * Class meant to save a starting element with its parameters.
          */
         private class PendingElement
         {
-            //~ Instance fields --------------------------------------------------------------------
 
             final String localName;
 
-            //~ Constructors -----------------------------------------------------------------------
-            public PendingElement (String localName)
+                        public PendingElement (String localName)
             {
                 this.localName = localName;
             }
 
-            //~ Methods ----------------------------------------------------------------------------
-            /** Write an empty element. */
+                        /** Write an empty element. */
             public void writeEmpty ()
                     throws XMLStreamException
             {
@@ -937,20 +928,17 @@ public abstract class Marshalling
         private class PendingElement2
                 extends PendingElement
         {
-            //~ Instance fields --------------------------------------------------------------------
 
             final String namespaceURI;
 
-            //~ Constructors -----------------------------------------------------------------------
-            public PendingElement2 (String namespaceURI,
+                        public PendingElement2 (String namespaceURI,
                                     String localName)
             {
                 super(localName);
                 this.namespaceURI = namespaceURI;
             }
 
-            //~ Methods ----------------------------------------------------------------------------
-            @Override
+                        @Override
             public void writeEmpty ()
                     throws XMLStreamException
             {
@@ -968,12 +956,10 @@ public abstract class Marshalling
         private class PendingElement3
                 extends PendingElement2
         {
-            //~ Instance fields --------------------------------------------------------------------
 
             final String prefix;
 
-            //~ Constructors -----------------------------------------------------------------------
-            public PendingElement3 (String prefix,
+                        public PendingElement3 (String prefix,
                                     String localName,
                                     String namespaceURI)
             {
@@ -981,8 +967,7 @@ public abstract class Marshalling
                 this.prefix = prefix;
             }
 
-            //~ Methods ----------------------------------------------------------------------------
-            @Override
+                        @Override
             public void writeEmpty ()
                     throws XMLStreamException
             {

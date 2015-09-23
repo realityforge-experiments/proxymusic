@@ -43,18 +43,12 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 public abstract class Mxl
 {
-    //~ Static fields/initializers -----------------------------------------------------------------
-
     /** Name of the specific entry for container. */
     private static final String CONTAINER_ENTRY_NAME = "META-INF/container.xml";
 
     /** Container [un]marshalling context. */
     private static JAXBContext containerContext;
 
-    //~ Methods ------------------------------------------------------------------------------------
-    //------------//
-    // getContext //
-    //------------//
     /**
      * Get access to (and elaborate if not yet done) the Container JAXB context.
      *
@@ -74,24 +68,17 @@ public abstract class Mxl
         return containerContext;
     }
 
-    //~ Inner Classes ------------------------------------------------------------------------------
-    //-------//
-    // Input //
-    //-------//
     /**
      * Class {@code Input} allows to read a .mxl file.
      */
     public static class Input
     {
-        //~ Instance fields ------------------------------------------------------------------------
-
         /** The underlying zip file. */
         private final ZipFile zipFile;
 
         /** MXL container. */
         private final Container container;
 
-        //~ Constructors ---------------------------------------------------------------------------
         /**
          * Create an {@code Input} object on a provided file.
          *
@@ -118,7 +105,6 @@ public abstract class Mxl
             container = (Container) um.unmarshal(cis);
         }
 
-        //~ Methods --------------------------------------------------------------------------------
         /**
          * Report the zip entry related to the provided name.
          *
@@ -163,8 +149,6 @@ public abstract class Mxl
     public static class MxlException
             extends Exception
     {
-        //~ Constructors ---------------------------------------------------------------------------
-
         public MxlException (Throwable cause)
         {
             super(cause);
@@ -176,16 +160,11 @@ public abstract class Mxl
         }
     }
 
-    //--------//
-    // Output //
-    //--------//
     /**
      * Class {@code Output} allows to write a .mxl file.
      */
     public static class Output
     {
-        //~ Instance fields ------------------------------------------------------------------------
-
         /** The global container. */
         private final Container container = new Container();
 
@@ -231,7 +210,7 @@ public abstract class Mxl
                 throws MxlException
         {
             try {
-                ZipEntry entry = new ZipEntry(rootFile.fullPath);
+                ZipEntry entry = new ZipEntry(rootFile._fullPath );
                 mos.putNextEntry(entry);
                 container.addRootFile(rootFile);
 
@@ -254,7 +233,7 @@ public abstract class Mxl
                 throws MxlException
         {
             try {
-                ZipEntry entry = new ZipEntry(rootFile.fullPath);
+                ZipEntry entry = new ZipEntry(rootFile._fullPath );
                 mos.putNextEntry(entry);
                 container.addFirstRootFile(rootFile);
 
@@ -301,22 +280,19 @@ public abstract class Mxl
             return mos;
         }
 
-        //~ Inner Classes --------------------------------------------------------------------------
-        /**
+                /**
          * An OutputStream sub-classed in order to intercept closing.
          */
         public class MxlOutputStream
                 extends ZipOutputStream
         {
-            //~ Constructors -----------------------------------------------------------------------
 
             public MxlOutputStream (OutputStream out)
             {
                 super(out, StandardCharsets.UTF_8);
             }
 
-            //~ Methods ----------------------------------------------------------------------------
-            @Override
+                        @Override
             public void close ()
                     throws IOException
             {
@@ -339,8 +315,6 @@ public abstract class Mxl
     @XmlRootElement(name = "container")
     private static class Container
     {
-        //~ Instance fields ------------------------------------------------------------------------
-
         /** The collection of root files. */
         @XmlElementWrapper(name = "rootfiles")
         @XmlElement(name = "rootfile")

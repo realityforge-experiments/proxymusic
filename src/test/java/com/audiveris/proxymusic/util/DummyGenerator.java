@@ -39,7 +39,6 @@ import java.math.BigInteger;
  */
 public abstract class DummyGenerator
 {
-    //~ Methods ------------------------------------------------------------------------------------
 
     /**
      * Build a ScorePartwise instance with as many measures as desired.

@@ -34,7 +34,6 @@ import java.io.OutputStream;
 public class OpusTest
     extends TestCase
 {
-    //~ Methods ------------------------------------------------------------------------------------
 
     @Test
     public void test ()

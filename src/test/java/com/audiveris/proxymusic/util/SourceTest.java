@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 public class SourceTest
     extends TestCase
 {
-    //~ Static fields/initializers -----------------------------------------------------------------
 
     private static final Logger logger = LoggerFactory.getLogger(SourceTest.class);
 
@@ -45,7 +44,6 @@ public class SourceTest
     /** Name of the temporary XML file. */
     private static final String FILE_NAME = "source-test.xml";
 
-    //~ Methods ------------------------------------------------------------------------------------
 
     //-----------------//
     // testBothInOrder //
@@ -173,10 +171,8 @@ public class SourceTest
     private void checkSource (ScorePartwise scorePartwise)
     {
         // Inspect the miscellaneous stuff
-        Identification identification = scorePartwise.getIdentification();
-        Miscellaneous  misc = identification.getMiscellaneous();
 
-        for (MiscellaneousField field : misc.getMiscellaneousField()) {
+        for (MiscellaneousField field : scorePartwise.getIdentification().getMiscellaneous().getMiscellaneousField()) {
             String name = field.getName();
             String value = field.getValue();
             logger.info("miscellaneous-field name:{} value:'{}'", name, value);

@@ -40,7 +40,6 @@ import javax.xml.bind.JAXBException;
 public class MxlTest
         extends TestCase
 {
-    //~ Methods ------------------------------------------------------------------------------------
 
     public static void main (String... args)
             throws JAXBException, FileNotFoundException, IOException, Mxl.MxlException,
@@ -79,12 +78,12 @@ public class MxlTest
         for (RootFile rootFile : mif.getRootFiles()) {
             System.out.println("   " + rootFile);
 
-            ZipEntry zipEntry = mif.getEntry(rootFile.fullPath);
+            ZipEntry zipEntry = mif.getEntry(rootFile._fullPath );
             System.out.println("   entryTime: " + new Date(zipEntry.getTime()));
         }
 
         RootFile first = mif.getRootFiles().get(0);
-        ZipEntry zipEntry = mif.getEntry(first.fullPath);
+        ZipEntry zipEntry = mif.getEntry(first._fullPath );
         InputStream is = mif.getInputStream(zipEntry);
         ScorePartwise newScorePartwise = (ScorePartwise) Marshalling.unmarshal(is);
         System.out.println(new Dumper.Column(newScorePartwise).toString());

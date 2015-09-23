@@ -59,7 +59,6 @@ import static com.audiveris.proxymusic.util.Marshalling.getContext;
 public class HelloWorldTest
         extends TestCase
 {
-    //~ Static fields/initializers -----------------------------------------------------------------
 
     private static final Logger logger = LoggerFactory.getLogger(HelloWorldTest.class);
 
@@ -101,7 +100,6 @@ public class HelloWorldTest
     /** Name of the temporary XML file. */
     private static final String FILE_NAME = "hello-world-test.xml";
 
-    //~ Methods ------------------------------------------------------------------------------------
     //------//
     // main //
     //------//
@@ -548,10 +546,8 @@ public class HelloWorldTest
         System.out.println();
     }
 
-    //~ Inner Classes ------------------------------------------------------------------------------
     private static class AttrData
     {
-        //~ Instance fields ------------------------------------------------------------------------
 
         final BigDecimal divisions;
 
@@ -584,7 +580,6 @@ public class HelloWorldTest
 
     private static class MeasData
     {
-        //~ Instance fields ------------------------------------------------------------------------
 
         final String number;
 
@@ -601,7 +596,6 @@ public class HelloWorldTest
 
     private static class NoteData
     {
-        //~ Instance fields ------------------------------------------------------------------------
 
         final Step pitchStep;
 
@@ -626,7 +620,6 @@ public class HelloWorldTest
 
     private static class PartData
     {
-        //~ Instance fields ------------------------------------------------------------------------
 
         final String id;
 

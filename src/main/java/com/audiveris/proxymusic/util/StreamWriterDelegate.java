@@ -46,7 +46,6 @@ public class StreamWriterDelegate
         this.writer = writer;
     }
 
-    //~ Methods ------------------------------------------------------------------------------------
     @Override
     public void close ()
             throws XMLStreamException
