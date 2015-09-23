@@ -64,567 +64,536 @@ import java.util.Map;
  */
 public abstract class Dumper
 {
-    //~ Instance fields --------------------------------------------------------
+  /**
+   * The object to be dumped
+   */
+  protected final Object obj;
 
-    /**
-     * The object to be dumped
-     */
-    protected final Object obj;
+  /**
+   * The string buffer used as output
+   */
+  protected final StringBuffer sb;
 
-    /**
-     * The string buffer used as output
-     */
-    protected final StringBuffer sb;
+  /**
+   * Can we use HTML directives?
+   */
+  protected final boolean useHtml;
 
-    /**
-     * Can we use HTML directives?
-     */
-    protected final boolean useHtml;
+  /**
+   * Maximum number of collection items printed
+   */
+  private final int MAX_COLLECTION_INDEX = 9;
 
-    /** Maximum number of collection items printed */
-    private final int MAX_COLLECTION_INDEX = 9;
+  /**
+   * Class (beware, this variable is updated as we walk up the inheritance
+   * tree)
+   */
+  protected Class cl;
 
-    /**
-     * Class (beware, this variable is updated as we walk up the inheritance
-     * tree)
-     */
-    protected Class cl;
+  /**
+   * Creates a new Dumper.
+   *
+   * @param obj the object instance to be dumped.
+   */
+  private Dumper( Object obj,
+                  boolean useHtml )
+  {
+    // (re)Allocate the string buffer
+    sb = new StringBuffer( 1024 );
 
-    //~ Constructors -----------------------------------------------------------
+    // Cache the object & the related class
+    this.obj = obj;
+    this.useHtml = useHtml;
+    cl = obj.getClass();
+  }
 
-    /**
-     * Creates a new Dumper.
-     *
-     * @param obj the object instance to be dumped.
-     */
-    private Dumper (Object  obj,
-                    boolean useHtml)
+  /**
+   * Predicate to determine if a given class is worth being printed. This
+   * method could be overridden to reflect customized policy. Note that when
+   * walking up the inheritance tree, the browsing is stopped as soon as a
+   * non-relevant class is encountered.
+   *
+   * @param cl the class at stake
+   * @return true if found relevant
+   */
+  public static boolean isClassRelevant( Class cl )
+  {
+    //        return (cl != null) && !cl.getName()
+    //                                  .startsWith("java.") &&
+    //               !cl.getName()
+    //                  .startsWith("javax.");
+    return ( cl != null ) && cl.getName()
+      .startsWith( "omr." );
+  }
+
+  //-----------------//
+  // isFieldRelevant //
+  //-----------------//
+
+  /**
+   * Predicate to determine if a given field is worth being printed. This
+   * method could be overridden to reflect customized policy.
+   *
+   * @param field the field at stake
+   * @return true if found relevant
+   */
+  public static boolean isFieldRelevant( Field field )
+  {
+    // We don't print static field since the Dumper is meant for instances
+    if ( Modifier.isStatic( field.getModifiers() ) )
     {
-        // (re)Allocate the string buffer
-        sb = new StringBuffer(1024);
-
-        // Cache the object & the related class
-        this.obj = obj;
-        this.useHtml = useHtml;
-        cl = obj.getClass();
+      return false;
     }
 
-    //~ Methods ----------------------------------------------------------------
-
-    //-----------------//
-    // isClassRelevant //
-    //-----------------//
-    /**
-     * Predicate to determine if a given class is worth being printed. This
-     * method could be overridden to reflect customized policy. Note that when
-     * walking up the inheritance tree, the browsing is stopped as soon as a
-     * non-relevant class is encountered.
-     *
-     * @param cl the class at stake
-     *
-     * @return true if found relevant
-     */
-    public static boolean isClassRelevant (Class cl)
+    // We don't print non-user visible entities
+    if ( field.getName()
+           .indexOf( '$' ) != -1 )
     {
-        //        return (cl != null) && !cl.getName()
-        //                                  .startsWith("java.") &&
-        //               !cl.getName()
-        //                  .startsWith("javax.");
-        return (cl != null) && cl.getName()
-                                 .startsWith("omr.");
+      return false;
     }
 
-    //-----------------//
-    // isFieldRelevant //
-    //-----------------//
-    /**
-     * Predicate to determine if a given field is worth being printed. This
-     * method could be overridden to reflect customized policy.
-     *
-     * @param field the field at stake
-     *
-     * @return true if found relevant
-     */
-    public static boolean isFieldRelevant (Field field)
+    return true;
+  }
+
+  //------//
+  // dump //
+  //------//
+
+  /**
+   * Helper function that prints the internal data of an object onto the
+   * standard output.
+   *
+   * @param obj the instance to dump
+   */
+  public static void dump( Object obj )
+  {
+    dump( obj, null, 0 );
+  }
+
+  //------//
+  // dump //
+  //------//
+
+  /**
+   * Helper function that prints the internal data of an object onto the
+   * standard output, with a specified left indentation level.
+   *
+   * @param obj   the instance to dump
+   * @param level the indentation level (0 means no indentation)
+   */
+  public static void dump( Object obj,
+                           int level )
+  {
+    dump( obj, null, level );
+  }
+
+  //------//
+  // dump //
+  //------//
+
+  /**
+   * Helper function that prints the internal data of an object onto the
+   * standard output, with the ability to print a related title
+   *
+   * @param obj   the object to dump
+   * @param title the title to print beforehand
+   */
+  public static void dump( Object obj,
+                           String title )
+  {
+    dump( obj, title, 0 );
+  }
+
+  //------//
+  // dump //
+  //------//
+
+  /**
+   * Helper function that prints the internal data of an object onto the
+   * standard output, with room for a title and left indentation.
+   *
+   * @param obj   the object to dump
+   * @param title the title to print beforehand
+   * @param level the indentation level (0 for no indent)
+   */
+  public static void dump( Object obj,
+                           String title,
+                           int level )
+  {
+    new Column( obj, title, level ).print();
+  }
+
+  //--------//
+  // dumpOf //
+  //--------//
+
+  /**
+   * Helper function that returns a line which contains the whole set of
+   * internal data
+   *
+   * @param obj the object whose data is to be printed
+   * @return the string of data values
+   */
+  public static String dumpOf( Object obj )
+  {
+    return new Row( obj ).toString();
+  }
+
+  //------------//
+  // htmlDumpOf //
+  //------------//
+
+  /**
+   * Helper function that prints a special kind of information string, using
+   * HTML tags so that an html editor can easily render this.
+   *
+   * @param obj the object to dump
+   * @return the HTML string
+   */
+  public static String htmlDumpOf( Object obj )
+  {
+    return new Html( obj ).toString();
+  }
+
+  /**
+   * Print the dump string onto the standard output
+   */
+  public void print()
+  {
+    System.out.println( toString() );
+  }
+
+  /**
+   * Return the string buffer content
+   *
+   * @return the dump of the object as a string
+   */
+  @Override
+  public String toString()
+  {
+    // Do the processing
+    processObject();
+
+    // Return the final content of string buffer
+    return sb.toString();
+  }
+
+  /**
+   * To be overridden so as to print the epilog of class data
+   */
+  protected void printClassEpilog()
+  {
+  }
+
+  /**
+   * To be overridden so as to print the prolog of class data
+   */
+  protected void printClassProlog()
+  {
+  }
+
+  protected void printCollectionValue( Collection col )
+  {
+    sb.append( "[" );
+
+    int i = 0;
+
+    for ( Object obj : col )
     {
-        // We don't print static field since the Dumper is meant for instances
-        if (Modifier.isStatic(field.getModifiers())) {
-            return false;
-        }
+      if ( i++ > 0 )
+      {
+        sb.append( useHtml ? ",<br/>" : "," );
+      }
 
-        // We don't print non-user visible entities
-        if (field.getName()
-                 .indexOf('$') != -1) {
-            return false;
-        }
+      // Safeguard action when the object is a big collection
+      if ( i > MAX_COLLECTION_INDEX )
+      {
+        sb.append( " ... " + col.size() + " items" );
 
-        return true;
+        break;
+      }
+      else
+      {
+        sb.append( obj );
+      }
     }
 
-    //------//
-    // dump //
-    //------//
-    /**
-     * Helper function that prints the internal data of an object onto the
-     * standard output.
-     *
-     * @param obj the instance to dump
-     */
-    public static void dump (Object obj)
+    sb.append( "]" );
+  }
+
+  /**
+   * Basic printing of field name and value. The method can of course be
+   * overridden.
+   *
+   * @param name  the field name
+   * @param value the field value, which may be null
+   */
+  protected void printField( String name,
+                             Object value )
+  {
+    if ( value == null )
     {
-        dump(obj, null, 0);
+      sb.append( "null" );
+    }
+    else
+    {
+      if ( value instanceof Collection )
+      {
+        printCollectionValue( (Collection) value );
+      }
+      else if ( value instanceof Map )
+      {
+        printCollectionValue( ( (Map) value ).entrySet() );
+      }
+      else
+      {
+        sb.append( value.toString() );
+      }
+    }
+  }
+
+  private void processClass()
+  {
+    // Class Prolog
+    printClassProlog();
+
+    // Process the class Fields
+    for ( Field field : cl.getDeclaredFields() )
+    {
+      processField( field );
     }
 
-    //------//
-    // dump //
-    //------//
-    /**
-     * Helper function that prints the internal data of an object onto the
-     * standard output, with a specified left indentation level.
-     *
-     * @param obj   the instance to dump
-     * @param level the indentation level (0 means no indentation)
-     */
-    public static void dump (Object obj,
-                             int    level)
+    // Class Epilog
+    printClassEpilog();
+  }
+
+  private void processField( Field field )
+  {
+    // Check that we are really interested in printing this field out
+    if ( isFieldRelevant( field ) )
     {
-        dump(obj, null, level);
+      // Override any access limitation
+      field.setAccessible( true );
+
+      try
+      {
+        // Retrieve field value in the object instance
+        Object value = field.get( obj );
+
+        // Print the field value as requested
+        printField( field.getName(), value );
+      }
+      catch ( IllegalAccessException ex )
+      {
+        // Cannot occur in fact, thanks to setAccessible
+      }
+    }
+  }
+
+  private void processObject()
+  {
+    do
+    {
+      // Process the class at hand
+      processClass();
+
+      // Walk up the inheritance tree
+      cl = cl.getSuperclass();
+    } while ( isClassRelevant( cl ) );
+  }
+
+  /**
+   * Class <code>Column</code> implements a Dumper where all fields are
+   * presented in one column, each field on a separate line. The column can be
+   * left indented, according to the specified indentation level.
+   */
+  public static class Column
+    extends Dumper
+  {
+    private static final String MEMBER_GAP = "   ";
+    private static final String INDENT_GAP = ".  ";
+
+    private final String title;
+    private final StringBuffer prefix;
+
+    public Column( Object obj )
+    {
+      this( obj, null, 0 );
     }
 
-    //------//
-    // dump //
-    //------//
-    /**
-     * Helper function that prints the internal data of an object onto the
-     * standard output, with the ability to print a related title
-     *
-     * @param obj   the object to dump
-     * @param title the title to print beforehand
-     */
-    public static void dump (Object obj,
-                             String title)
+    public Column( Object obj,
+                   String title )
     {
-        dump(obj, title, 0);
+      this( obj, title, 0 );
     }
 
-    //------//
-    // dump //
-    //------//
-    /**
-     * Helper function that prints the internal data of an object onto the
-     * standard output, with room for a title and left indentation.
-     *
-     * @param obj   the object to dump
-     * @param title the title to print beforehand
-     * @param level the indentation level (0 for no indent)
-     */
-    public static void dump (Object obj,
-                             String title,
-                             int    level)
+    public Column( Object obj,
+                   int level )
     {
-        new Column(obj, title, level).print();
+      this( obj, null, level );
     }
 
-    //--------//
-    // dumpOf //
-    //--------//
-    /**
-     * Helper function that returns a line which contains the whole set of
-     * internal data
-     *
-     * @param obj the object whose data is to be printed
-     *
-     * @return the string of data values
-     */
-    public static String dumpOf (Object obj)
+    public Column( Object obj,
+                   String title,
+                   int level )
     {
-        return new Row(obj).toString();
+      super( obj, false );
+
+      // Cache the title
+      if ( title != null )
+      {
+        this.title = title;
+      }
+      else
+      {
+        this.title = "";
+      }
+
+      // Prepare indent prefix
+      prefix = new StringBuffer( level * INDENT_GAP.length() );
+
+      for ( int i = level; i > 0; i-- )
+      {
+        prefix.append( INDENT_GAP );
+      }
     }
 
-    //------------//
-    // htmlDumpOf //
-    //------------//
-    /**
-     * Helper function that prints a special kind of information string, using
-     * HTML tags so that an html editor can easily render this.
-     *
-     * @param obj the object to dump
-     *
-     * @return the HTML string
-     */
-    public static String htmlDumpOf (Object obj)
-    {
-        return new Html(obj).toString();
-    }
-
-    //-------//
-    // print //
-    //-------//
-    /**
-     * Print the dump string onto the standard output
-     */
-    public void print ()
-    {
-        System.out.println(toString());
-    }
-
-    //----------//
-    // toString //
-    //----------//
-    /**
-     * Return the string buffer content
-     *
-     * @return the dump of the object as a string
-     */
     @Override
-    public String toString ()
+    protected void printClassProlog()
     {
-        // Do the processing
-        processObject();
-
-        // Return the final content of string buffer
-        return sb.toString();
+      // We print the class name only for the lowest class in
+      // heritance hierarchy
+      if ( obj.getClass() == cl )
+      {
+        sb.append( "\n" );
+        sb.append( prefix )
+          .append( cl.getName() );
+        sb.append( " " )
+          .append( title )
+          .append( ":" );
+      }
     }
 
-    //------------------//
-    // printClassEpilog //
-    //------------------//
-    /**
-     * To be overridden so as to print the epilog of class data
-     */
-    protected void printClassEpilog ()
+    @Override
+    protected void printField( String name,
+                               Object value )
     {
+      sb.append( "\n" );
+      sb.append( prefix )
+        .append( MEMBER_GAP );
+      sb.append( name )
+        .append( "=" );
+      super.printField( name, value );
+    }
+  }
+
+  /**
+   * Class <code>Html</code> implements a Dumper using HTML tags to present
+   * fields in a table.
+   */
+  public static class Html
+    extends Dumper
+  {
+    protected Html( Object obj )
+    {
+      super( obj, true );
     }
 
-    //------------------//
-    // printClassProlog //
-    //------------------//
-    /**
-     * To be overridden so as to print the prolog of class data
-     */
-    protected void printClassProlog ()
+    @Override
+    public String toString()
     {
+      // Style
+      sb.append( "<style> td {" )
+        .append( " font-family: Lucida Console, Verdana, sans-serif;" )
+        .append( " font-size: 9px;" )
+        .append( " font-style: normal;" )
+        .append( "} </style>" );
+
+      // Table begin
+      sb.append( "<table border=0 cellpadding=3>" );
+
+      // The object
+      super.processObject();
+
+      // Table end
+      sb.append( "</table>" );
+
+      // Return the final content of string buffer
+      return sb.toString();
     }
 
-    //----------------------//
-    // printCollectionValue //
-    //----------------------//
-    protected void printCollectionValue (Collection col)
+    @Override
+    protected void printClassProlog()
     {
-        sb.append("[");
-
-        int i = 0;
-
-        for (Object obj : col) {
-            if (i++ > 0) {
-                sb.append(useHtml ? ",<br/>" : ",");
-            }
-
-            // Safeguard action when the object is a big collection
-            if (i > MAX_COLLECTION_INDEX) {
-                sb.append(" ... " + col.size() + " items");
-
-                break;
-            } else {
-                sb.append(obj);
-            }
-        }
-
-        sb.append("]");
+      // Class name
+      sb.append( "<tr><td colspan=2><font color='BLUE'>" )
+        .append( cl.getName() )
+        .append( "</font></td></tr>" );
     }
 
-    //------------//
-    // printField //
-    //------------//
-    /**
-     * Basic printing of field name and value. The method can of course be
-     * overridden.
-     *
-     * @param name  the field name
-     * @param value the field value, which may be null
-     */
-    protected void printField (String name,
-                               Object value)
+    @Override
+    protected void printField( String name,
+                               Object value )
     {
-        if (value == null) {
-            sb.append("null");
-        } else {
-            if (value instanceof Collection) {
-                printCollectionValue((Collection) value);
-            } else if (value instanceof Map) {
-                printCollectionValue(((Map) value).entrySet());
-            } else {
-                sb.append(value.toString());
-            }
-        }
+      // One table row per field
+      sb.append( "<tr>" );
+
+      // First the field name
+      sb.append( "<td align='right'><font color='RED'>" )
+        .append( name )
+        .append( "</font></td>" );
+
+      // Then the field value
+      sb.append( "<td>" );
+      super.printField( name, value );
+
+      sb.append( "</td>" )
+        .append( "</tr>" );
+    }
+  }
+
+  /**
+   * Class <code>Row</code> implements a Dumper where all fields are presented
+   * on the same line.
+   */
+  public static class Row
+    extends Dumper
+  {
+    protected Row( Object obj )
+    {
+      super( obj, false );
     }
 
-    //--------------//
-    // processClass //
-    //--------------//
-    private void processClass ()
+    @Override
+    protected void printClassEpilog()
     {
-        // Class Prolog
-        printClassProlog();
-
-        // Process the class Fields
-        for (Field field : cl.getDeclaredFields()) {
-            processField(field);
-        }
-
-        // Class Epilog
-        printClassEpilog();
+      sb.append( "}" );
     }
 
-    //--------------//
-    // processField //
-    //--------------//
-    private void processField (Field field)
+    @Override
+    protected void printClassProlog()
     {
-        // Check that we are really interested in printing this field out
-        if (isFieldRelevant(field)) {
-            // Override any access limitation
-            field.setAccessible(true);
+      // Class name
+      sb.append( "{" );
 
-            try {
-                // Retrieve field value in the object instance
-                Object value = field.get(obj);
+      // Special annotation for superclass
+      if ( obj.getClass() != cl )
+      {
+        sb.append( "from " );
+      }
 
-                // Print the field value as requested
-                printField(field.getName(), value);
-            } catch (IllegalAccessException ex) {
-                // Cannot occur in fact, thanks to setAccessible
-            }
-        }
+      sb.append( cl.getName() )
+        .append( ":" );
     }
 
-    //---------------//
-    // processObject //
-    //---------------//
-    private void processObject ()
+    @Override
+    protected void printField( String name,
+                               Object value )
     {
-        do {
-            // Process the class at hand
-            processClass();
-
-            // Walk up the inheritance tree
-            cl = cl.getSuperclass();
-        } while (isClassRelevant(cl));
+      sb.append( " " );
+      sb.append( name )
+        .append( "=" );
+      super.printField( name, value );
     }
-
-    //~ Inner Classes ----------------------------------------------------------
-
-    //--------//
-    // Column //
-    //--------//
-    /**
-     * Class <code>Column</code> implements a Dumper where all fields are
-     * presented in one column, each field on a separate line. The column can be
-     * left indented, according to the specified indentation level.
-     */
-    public static class Column
-        extends Dumper
-    {
-        //~ Static fields/initializers -----------------------------------------
-
-        private static final String MEMBER_GAP = "   ";
-        private static final String INDENT_GAP = ".  ";
-
-        //~ Instance fields ----------------------------------------------------
-
-        private final String       title;
-        private final StringBuffer prefix;
-
-        //~ Constructors -------------------------------------------------------
-
-        public Column (Object obj)
-        {
-            this(obj, null, 0);
-        }
-
-        public Column (Object obj,
-                       String title)
-        {
-            this(obj, title, 0);
-        }
-
-        public Column (Object obj,
-                       int    level)
-        {
-            this(obj, null, level);
-        }
-
-        public Column (Object obj,
-                       String title,
-                       int    level)
-        {
-            super(obj, false);
-
-            // Cache the title
-            if (title != null) {
-                this.title = title;
-            } else {
-                this.title = "";
-            }
-
-            // Prepare indent prefix
-            prefix = new StringBuffer(level * INDENT_GAP.length());
-
-            for (int i = level; i > 0; i--) {
-                prefix.append(INDENT_GAP);
-            }
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        protected void printClassProlog ()
-        {
-            // We print the class name only for the lowest class in
-            // heritance hierarchy
-            if (obj.getClass() == cl) {
-                sb.append("\n");
-                sb.append(prefix)
-                  .append(cl.getName());
-                sb.append(" ")
-                  .append(title)
-                  .append(":");
-            }
-        }
-
-        @Override
-        protected void printField (String name,
-                                   Object value)
-        {
-            sb.append("\n");
-            sb.append(prefix)
-              .append(MEMBER_GAP);
-            sb.append(name)
-              .append("=");
-            super.printField(name, value);
-        }
-    }
-
-    //------//
-    // Html //
-    //------//
-    /**
-     * Class <code>Html</code> implements a Dumper using HTML tags to present
-     * fields in a table.
-     */
-    public static class Html
-        extends Dumper
-    {
-        //~ Constructors -------------------------------------------------------
-
-        protected Html (Object obj)
-        {
-            super(obj, true);
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public String toString ()
-        {
-            // Style
-            sb.append("<style> td {")
-              .append(" font-family: Lucida Console, Verdana, sans-serif;")
-              .append(" font-size: 9px;")
-              .append(" font-style: normal;")
-              .append("} </style>");
-
-            // Table begin
-            sb.append("<table border=0 cellpadding=3>");
-
-            // The object
-            super.processObject();
-
-            // Table end
-            sb.append("</table>");
-
-            // Return the final content of string buffer
-            return sb.toString();
-        }
-
-        @Override
-        protected void printClassProlog ()
-        {
-            // Class name
-            sb.append("<tr><td colspan=2><font color='BLUE'>")
-              .append(cl.getName())
-              .append("</font></td></tr>");
-        }
-
-        @Override
-        protected void printField (String name,
-                                   Object value)
-        {
-            // One table row per field
-            sb.append("<tr>");
-
-            // First the field name
-            sb.append("<td align='right'><font color='RED'>")
-              .append(name)
-              .append("</font></td>");
-
-            // Then the field value
-            sb.append("<td>");
-            super.printField(name, value);
-
-            sb.append("</td>")
-              .append("</tr>");
-        }
-    }
-
-    //-----//
-    // Row //
-    //-----//
-    /**
-     * Class <code>Row</code> implements a Dumper where all fields are presented
-     * on the same line.
-     */
-    public static class Row
-        extends Dumper
-    {
-        //~ Constructors -------------------------------------------------------
-
-        protected Row (Object obj)
-        {
-            super(obj, false);
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        protected void printClassEpilog ()
-        {
-            sb.append("}");
-        }
-
-        @Override
-        protected void printClassProlog ()
-        {
-            // Class name
-            sb.append("{");
-
-            // Special annotation for superclass
-            if (obj.getClass() != cl) {
-                sb.append("from ");
-            }
-
-            sb.append(cl.getName())
-              .append(":");
-        }
-
-        @Override
-        protected void printField (String name,
-                                   Object value)
-        {
-            sb.append(" ");
-            sb.append(name)
-              .append("=");
-            super.printField(name, value);
-        }
-    }
+  }
 }

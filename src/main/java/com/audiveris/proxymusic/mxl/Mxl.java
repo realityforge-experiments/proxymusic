@@ -43,316 +43,320 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 public abstract class Mxl
 {
-    /** Name of the specific entry for container. */
-    private static final String CONTAINER_ENTRY_NAME = "META-INF/container.xml";
+  /**
+   * Name of the specific entry for container.
+   */
+  private static final String CONTAINER_ENTRY_NAME = "META-INF/container.xml";
 
-    /** Container [un]marshalling context. */
-    private static JAXBContext containerContext;
+  /**
+   * Container [un]marshalling context.
+   */
+  private static JAXBContext containerContext;
+
+  /**
+   * Get access to (and elaborate if not yet done) the Container JAXB context.
+   *
+   * @return the ready to use JAXB context
+   * @throws JAXBException if anything goes wrong
+   */
+  private static JAXBContext getContext()
+    throws JAXBException
+  {
+    // Lazy creation
+    if ( containerContext == null )
+    {
+      synchronized ( Mxl.class )
+      {
+        containerContext = JAXBContext.newInstance( Container.class );
+      }
+    }
+
+    return containerContext;
+  }
+
+  /**
+   * Class {@code Input} allows to read a .mxl file.
+   */
+  public static class Input
+  {
+    /**
+     * The underlying zip file.
+     */
+    private final ZipFile zipFile;
 
     /**
-     * Get access to (and elaborate if not yet done) the Container JAXB context.
+     * MXL container.
+     */
+    private final Container container;
+
+    /**
+     * Create an {@code Input} object on a provided file.
      *
-     * @return the ready to use JAXB context
-     * @exception JAXBException if anything goes wrong
+     * @param file the provided file
      */
-    private static JAXBContext getContext ()
-            throws JAXBException
+    public Input( final File file )
+      throws IOException, MxlException, JAXBException
     {
-        // Lazy creation
-        if (containerContext == null) {
-            synchronized (Mxl.class) {
-                containerContext = JAXBContext.newInstance(Container.class);
-            }
-        }
+      zipFile = new ZipFile( file );
 
-        return containerContext;
+      // Retrieve container
+      ZipEntry containerEntry = zipFile.getEntry( CONTAINER_ENTRY_NAME );
+
+      if ( containerEntry == null )
+      {
+        throw new MxlException( "No container found in " + file );
+      }
+
+      InputStream cis = zipFile.getInputStream( containerEntry );
+      Unmarshaller um = getContext().createUnmarshaller();
+      container = (Container) um.unmarshal( cis );
     }
 
     /**
-     * Class {@code Input} allows to read a .mxl file.
+     * Report the zip entry related to the provided name.
+     *
+     * @param entryName the provided entry name
+     * @return the entry in the .mxl file
      */
-    public static class Input
+    public ZipEntry getEntry( String entryName )
+      throws IOException
     {
-        /** The underlying zip file. */
-        private final ZipFile zipFile;
-
-        /** MXL container. */
-        private final Container container;
-
-        /**
-         * Create an {@code Input} object on a provided file.
-         *
-         * @param file the provided file
-         * @throws FileNotFoundException
-         * @throws IOException
-         * @throws MxlException
-         * @throws JAXBException
-         */
-        public Input (File file)
-                throws FileNotFoundException, IOException, MxlException, JAXBException
-        {
-            zipFile = new ZipFile(file);
-
-            // Retrieve container
-            ZipEntry containerEntry = zipFile.getEntry(CONTAINER_ENTRY_NAME);
-
-            if (containerEntry == null) {
-                throw new MxlException("No container found in " + file);
-            }
-
-            InputStream cis = zipFile.getInputStream(containerEntry);
-            Unmarshaller um = getContext().createUnmarshaller();
-            container = (Container) um.unmarshal(cis);
-        }
-
-        /**
-         * Report the zip entry related to the provided name.
-         *
-         * @param entryName the provided entry name
-         * @return the entry in the .mxl file
-         * @throws IOException
-         */
-        public ZipEntry getEntry (String entryName)
-                throws IOException
-        {
-            return zipFile.getEntry(entryName);
-        }
-
-        /**
-         * Report the input stream related to the provided zip entry.
-         *
-         * @param zipEntry the provided zip entry
-         * @return the corresponding input stream
-         * @throws IOException
-         */
-        public InputStream getInputStream (ZipEntry zipEntry)
-                throws IOException
-        {
-            return zipFile.getInputStream(zipEntry);
-        }
-
-        /**
-         * Report the sequence of root files in the container.
-         *
-         * @return the (un-mutable) list of RootFile instances
-         */
-        public List<RootFile> getRootFiles ()
-        {
-            return Collections.unmodifiableList(container.rootFiles);
-        }
-    }
-
-    //--------------//
-    // MxlException //
-    //--------------//
-    /** Global exception. */
-    public static class MxlException
-            extends Exception
-    {
-        public MxlException (Throwable cause)
-        {
-            super(cause);
-        }
-
-        public MxlException (String msg)
-        {
-            super(msg);
-        }
+      return zipFile.getEntry( entryName );
     }
 
     /**
-     * Class {@code Output} allows to write a .mxl file.
+     * Report the input stream related to the provided zip entry.
+     *
+     * @param zipEntry the provided zip entry
+     * @return the corresponding input stream
      */
-    public static class Output
+    public InputStream getInputStream( ZipEntry zipEntry )
+      throws IOException
     {
-        /** The global container. */
-        private final Container container = new Container();
-
-        /** The underlying zip output stream. */
-        private final MxlOutputStream mos;
-
-        /** Flag to indicate if the stream has already been closed. */
-        private boolean closed;
-
-        //~ Constructors ---------------------------------------------------------------------------
-        /**
-         * Create an {@code Output} object on a provided output stream.
-         *
-         * @param out the provided output stream
-         */
-        public Output (OutputStream out)
-        {
-            mos = new MxlOutputStream(new BufferedOutputStream(out));
-        }
-
-        /**
-         * Create an {@code Output} object on a provided output file.
-         *
-         * @param file the file to write
-         * @throws FileNotFoundException
-         */
-        public Output (File file)
-                throws FileNotFoundException
-        {
-            this(new FileOutputStream(file));
-        }
-
-        //~ Methods --------------------------------------------------------------------------------
-        /**
-         * Insert a new RootFile entry into this file.
-         * This populates the internal container and positions the stream output accordingly.
-         *
-         * @param rootFile the provided RootFile
-         * @return the corresponding Zip entry
-         * @throws com.audiveris.proxymusic.mxl.Mxl.MxlException
-         */
-        public ZipEntry addEntry (RootFile rootFile)
-                throws MxlException
-        {
-            try {
-                ZipEntry entry = new ZipEntry(rootFile._fullPath );
-                mos.putNextEntry(entry);
-                container.addRootFile(rootFile);
-
-                return entry;
-            } catch (IOException ex) {
-                throw new MxlException(ex);
-            }
-        }
-
-        /**
-         * Insert the provided RootFile as the FIRST entry.
-         * This can be called at any time, to populate the internal container in first position, and
-         * position the stream output accordingly.
-         *
-         * @param rootFile the provided RootFile
-         * @return the corresponding Zip entry
-         * @throws com.audiveris.proxymusic.mxl.Mxl.MxlException
-         */
-        public ZipEntry addFirstEntry (RootFile rootFile)
-                throws MxlException
-        {
-            try {
-                ZipEntry entry = new ZipEntry(rootFile._fullPath );
-                mos.putNextEntry(entry);
-                container.addFirstRootFile(rootFile);
-
-                return entry;
-            } catch (IOException ex) {
-                throw new MxlException(ex);
-            }
-        }
-
-        /**
-         * Write the container and close the underlying output stream.
-         *
-         * @throws IOException
-         */
-        public void close ()
-                throws IOException
-        {
-            if (closed) {
-                return;
-            }
-
-            try {
-                // Marshal the container
-                Marshaller m = Mxl.getContext().createMarshaller();
-                mos.putNextEntry(new ZipEntry(CONTAINER_ENTRY_NAME));
-                m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-                m.marshal(container, mos);
-
-                // Close everything
-                closed = true;
-                mos.close();
-            } catch (JAXBException ex) {
-                throw new IOException(ex);
-            }
-        }
-
-        /**
-         * Report the underlying Zip output stream.
-         *
-         * @return the Zip output stream
-         */
-        public OutputStream getOutputStream ()
-        {
-            return mos;
-        }
-
-                /**
-         * An OutputStream sub-classed in order to intercept closing.
-         */
-        public class MxlOutputStream
-                extends ZipOutputStream
-        {
-
-            public MxlOutputStream (OutputStream out)
-            {
-                super(out, StandardCharsets.UTF_8);
-            }
-
-                        @Override
-            public void close ()
-                    throws IOException
-            {
-                // Write the container data
-                Output.this.close();
-
-                // Close the stream
-                super.close();
-            }
-        }
+      return zipFile.getInputStream( zipEntry );
     }
 
-    //-----------//
-    // Container //
-    //-----------//
     /**
-     * The mandatory container structure.
+     * Report the sequence of root files in the container.
+     *
+     * @return the (un-mutable) list of RootFile instances
      */
-    @XmlAccessorType(XmlAccessType.NONE)
-    @XmlRootElement(name = "container")
-    private static class Container
+    public List<RootFile> getRootFiles()
     {
-        /** The collection of root files. */
-        @XmlElementWrapper(name = "rootfiles")
-        @XmlElement(name = "rootfile")
-        private final List<RootFile> rootFiles = new ArrayList<RootFile>();
-
-        //~ Constructors ---------------------------------------------------------------------------
-        /**
-         * No-arg constructor, needed by JAXB.
-         */
-        public Container ()
-        {
-        }
-
-        //~ Methods --------------------------------------------------------------------------------
-        //------------------//
-        // addFirstRootFile //
-        //------------------//
-        /**
-         * Add the rootFile entry to the container, in first position.
-         *
-         * @param rootFile the entry to add
-         */
-        public void addFirstRootFile (RootFile rootFile)
-        {
-            rootFiles.add(0, rootFile);
-        }
-
-        //-------------//
-        // addRootFile //
-        //-------------//
-        /**
-         * Add one rootFile entry to the container.
-         *
-         * @param rootFile the entry to add
-         */
-        public void addRootFile (RootFile rootFile)
-        {
-            rootFiles.add(rootFile);
-        }
+      return Collections.unmodifiableList( container.rootFiles );
     }
+  }
+
+  /**
+   * Global exception.
+   */
+  public static class MxlException
+    extends Exception
+  {
+    public MxlException( Throwable cause )
+    {
+      super( cause );
+    }
+
+    public MxlException( String msg )
+    {
+      super( msg );
+    }
+  }
+
+  /**
+   * Class {@code Output} allows to write a .mxl file.
+   */
+  public static class Output
+  {
+    /**
+     * The global container.
+     */
+    private final Container container = new Container();
+
+    /**
+     * The underlying zip output stream.
+     */
+    private final MxlOutputStream mos;
+
+    /**
+     * Flag to indicate if the stream has already been closed.
+     */
+    private boolean closed;
+
+    /**
+     * Create an {@code Output} object on a provided output stream.
+     *
+     * @param out the provided output stream
+     */
+    public Output( OutputStream out )
+    {
+      mos = new MxlOutputStream( new BufferedOutputStream( out ) );
+    }
+
+    /**
+     * Create an {@code Output} object on a provided output file.
+     *
+     * @param file the file to write
+     */
+    public Output( File file )
+      throws FileNotFoundException
+    {
+      this( new FileOutputStream( file ) );
+    }
+
+    /**
+     * Insert a new RootFile entry into this file.
+     * This populates the internal container and positions the stream output accordingly.
+     *
+     * @param rootFile the provided RootFile
+     * @return the corresponding Zip entry
+     */
+    public ZipEntry addEntry( RootFile rootFile )
+      throws MxlException
+    {
+      try
+      {
+        ZipEntry entry = new ZipEntry( rootFile._fullPath );
+        mos.putNextEntry( entry );
+        container.addRootFile( rootFile );
+
+        return entry;
+      }
+      catch ( IOException ex )
+      {
+        throw new MxlException( ex );
+      }
+    }
+
+    /**
+     * Insert the provided RootFile as the FIRST entry.
+     * This can be called at any time, to populate the internal container in first position, and
+     * position the stream output accordingly.
+     *
+     * @param rootFile the provided RootFile
+     * @return the corresponding Zip entry
+     */
+    public ZipEntry addFirstEntry( RootFile rootFile )
+      throws MxlException
+    {
+      try
+      {
+        ZipEntry entry = new ZipEntry( rootFile._fullPath );
+        mos.putNextEntry( entry );
+        container.addFirstRootFile( rootFile );
+
+        return entry;
+      }
+      catch ( IOException ex )
+      {
+        throw new MxlException( ex );
+      }
+    }
+
+    /**
+     * Write the container and close the underlying output stream.
+     */
+    public void close()
+      throws IOException
+    {
+      if ( closed )
+      {
+        return;
+      }
+
+      try
+      {
+        // Marshal the container
+        Marshaller m = Mxl.getContext().createMarshaller();
+        mos.putNextEntry( new ZipEntry( CONTAINER_ENTRY_NAME ) );
+        m.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, true );
+        m.marshal( container, mos );
+
+        // Close everything
+        closed = true;
+        mos.close();
+      }
+      catch ( JAXBException ex )
+      {
+        throw new IOException( ex );
+      }
+    }
+
+    /**
+     * Report the underlying Zip output stream.
+     *
+     * @return the Zip output stream
+     */
+    public OutputStream getOutputStream()
+    {
+      return mos;
+    }
+
+    /**
+     * An OutputStream sub-classed in order to intercept closing.
+     */
+    public class MxlOutputStream
+      extends ZipOutputStream
+    {
+
+      public MxlOutputStream( OutputStream out )
+      {
+        super( out, StandardCharsets.UTF_8 );
+      }
+
+      @Override
+      public void close()
+        throws IOException
+      {
+        // Write the container data
+        Output.this.close();
+
+        // Close the stream
+        super.close();
+      }
+    }
+  }
+
+  /**
+   * The mandatory container structure.
+   */
+  @XmlAccessorType( XmlAccessType.NONE )
+  @XmlRootElement( name = "container" )
+  private static class Container
+  {
+    /**
+     * The collection of root files.
+     */
+    @XmlElementWrapper( name = "rootfiles" )
+    @XmlElement( name = "rootfile" )
+    private final List<RootFile> rootFiles = new ArrayList<RootFile>();
+
+    /**
+     * No-arg constructor, needed by JAXB.
+     */
+    public Container()
+    {
+    }
+
+    /**
+     * Add the rootFile entry to the container, in first position.
+     *
+     * @param rootFile the entry to add
+     */
+    public void addFirstRootFile( RootFile rootFile )
+    {
+      rootFiles.add( 0, rootFile );
+    }
+
+    /**
+     * Add one rootFile entry to the container.
+     *
+     * @param rootFile the entry to add
+     */
+    public void addRootFile( RootFile rootFile )
+    {
+      rootFiles.add( rootFile );
+    }
+  }
 }
