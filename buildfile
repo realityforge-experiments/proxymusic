@@ -31,4 +31,6 @@ define 'proxymusic' do
   package(:jar)
   package(:sources)
   package(:javadoc)
+
+  iml.add_jruby_facet
 end
