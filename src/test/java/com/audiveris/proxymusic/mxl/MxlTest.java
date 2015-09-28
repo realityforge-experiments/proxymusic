@@ -48,7 +48,7 @@ public class MxlTest
 
     System.out.println( "Marshalling ..." );
 
-    Mxl.Output mof = new Mxl.Output( new File( fileName ) );
+    Output mof = new Output( new File( fileName ) );
     OutputStream zos = mof.getOutputStream();
     ScorePartwise scorePartwise = DummyGenerator.buildScorePartwise( "First score", 4 );
     System.out.println( new Dumper.Column( scorePartwise ).toString() );
@@ -63,7 +63,7 @@ public class MxlTest
 
     System.out.println( "Unmarshalling ..." );
 
-    Mxl.Input mif = new Mxl.Input( new File( fileName ) );
+    Input mif = new Input( new File( fileName ) );
 
     for ( RootFile rootFile : mif.getRootFiles() )
     {

@@ -21,17 +21,10 @@ import javax.xml.stream.XMLStreamWriter;
  *
  * @author Hervé Bitteur
  */
-public class StreamWriterDelegate
+class StreamWriterDelegate
   implements XMLStreamWriter
 {
   private XMLStreamWriter _writer;
-
-  /**
-   * Construct an empty filter with no parent.
-   */
-  public StreamWriterDelegate()
-  {
-  }
 
   /**
    * Construct a filter with the specified parent.
@@ -40,7 +33,7 @@ public class StreamWriterDelegate
    */
   public StreamWriterDelegate( final XMLStreamWriter writer )
   {
-    this._writer = writer;
+    _writer = writer;
   }
 
   @Override

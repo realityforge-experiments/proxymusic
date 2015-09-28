@@ -12,7 +12,8 @@
 package com.audiveris.proxymusic.opus;
 
 import com.audiveris.proxymusic.ScorePartwise;
-import com.audiveris.proxymusic.mxl.Mxl;
+import com.audiveris.proxymusic.mxl.Input;
+import com.audiveris.proxymusic.mxl.Output;
 import com.audiveris.proxymusic.mxl.RootFile;
 import com.audiveris.proxymusic.util.DummyGenerator;
 import com.audiveris.proxymusic.util.Dumper;
@@ -47,7 +48,7 @@ public class MxlOpusTest
   /**
    * Global MXL input stream.
    */
-  private Mxl.Input mi;
+  private Input mi;
 
   /**
    * Single entry point for testing.
@@ -125,7 +126,7 @@ public class MxlOpusTest
     logger.info( "Beginning of reloading" );
 
     File file = new File( DIR, FILE_NAME );
-    mi = new Mxl.Input( file );
+    mi = new Input( file );
 
     // Un-marshal
     RootFile first = mi.getRootFiles().get( 0 );
@@ -165,7 +166,7 @@ public class MxlOpusTest
     logger.info( "Beginning of storing" );
 
     File file = new File( DIR, FILE_NAME );
-    Mxl.Output mo = new Mxl.Output( new FileOutputStream( file ) );
+    Output mo = new Output( new FileOutputStream( file ) );
     OutputStream zos = mo.getOutputStream();
 
     // Allocate the top opus
